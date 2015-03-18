@@ -10,7 +10,6 @@
  */
 
 struct TokenizerT_ {
-	char* separator;
 	char* mainString;
 	int ctpos;
 	int totalpos; 
@@ -33,45 +32,24 @@ typedef struct TokenizerT_ TokenizerT;
  * You need to fill in this function as part of your implementation.
  */
 
-TokenizerT *TKCreate(char *separators, char *ts) {
+TokenizerT *TKCreate(char *ts) {
 	TokenizerT* tempToken = (TokenizerT*)malloc(sizeof(TokenizerT));
-	tempToken->separator = separators;
 	tempToken->mainString = ts;
 	tempToken->ctpos = 0;
-	//char escseq[] = {'n','t','v','b','r','f','a'};
-	//escseq[7] = '?';
-	//escseq[8] = ''';
-	//escseq[9] = '"';
 	int eq;  
 	char* temphold = (char*)malloc(sizeof(char)*1024); //Holds the token in question.
 	char* temphold2 = (char*)malloc(sizeof(char)*1024);
 	int th = 0; // Keeps track of character position in temphold.
 	int tspos; // Keeps track of character position in ts.
-	int seppos; // Keeps track of character postion in separators.
-	int espos; // Keeps track of character position in escseq.
 	int tempctpos = 0; // Keeps track of spots filled by tokens in currenttoken.
 	int sepconf = 0;	
 
 	for(tspos = 0; tspos  < strlen(ts); tspos++){ //runs through each character of the token string 
-		//if (
-		for(seppos = 0; seppos < strlen(separators); seppos++){ //runs through each character of the given seperators
-			if(ts[tspos] == separators[seppos]){ //if specific character in token string is a seperator
-				sepconf = 1;		
-			}
-				/*
-				for(eq = 0; eq <= 7; eq++){
-					if(ts[tspos] == escseq[eq]){
-						sepconf = 1;
-					}
-				}
-				*/	
-		}
-		if(sepconf != 1){ //found no seperator
+		if(ts[tspos] != ' '){ //found no seperator
 		temphold[th] = ts[tspos]; //adds char to temphold
 		th++;
 		}
-		else if(sepconf == 1 && strcmp(temphold, temphold2) == 0){
-		sepconf = 0;	
+		else if(sts[tspos] != ' ' & strcmp(temphold, temphold2) == 0){
 		} 
 		else{
 		temphold[th] = 0;
@@ -88,7 +66,6 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 	strcpy(tempToken->currenttoken[tempctpos], temphold);
 	tempctpos++; 
 	tempToken->totalpos = tempctpos;
-	//printf("%d\n", tempToken->totalpos);
 	return tempToken;
 }
 
