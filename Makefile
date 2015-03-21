@@ -1,14 +1,17 @@
 CCFLAGS = -ggdb -Wall
 
-all: compile
+all: compile main
 
-compile: main.c main.h
-	gcc $(CCFLAGS) main.c -o shell
+compile: shell.c shell.h
+	gcc $(CCFLAGS) shell.c -o shell
+
+main: main.c main.h
+	gcc $(CCFLAGS) main.c -o main
 
 # this will reformat your code according to the linux guidelines.
 # be careful when using this command!
-pretty: main.c main.h
-	indent -linux main.c main.h
+pretty: shell.c shell.h
+	indent -linux shell.c shell.h
 
 clean:
 	rm -rf shell
