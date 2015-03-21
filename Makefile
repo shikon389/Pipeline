@@ -1,8 +1,8 @@
 CCFLAGS = -ggdb -Wall
 
-all: compile main
+all: shell main
 
-compile: shell.c shell.h
+shell: shell.c shell.h
 	gcc $(CCFLAGS) shell.c -o shell
 
 main: main.c main.h
@@ -14,5 +14,5 @@ pretty: shell.c shell.h
 	indent -linux shell.c shell.h
 
 clean:
-	rm -rf shell
+	rm -rf shell main
 
