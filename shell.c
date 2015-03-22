@@ -204,14 +204,16 @@ void tokenize()
 	}
 
 	if (tokenizer->input[i-1] != '\'' && tokenizer->input[i - 1] != '\"'){
-	tokenizer->tokens_list[tokenizer->current_pos]->tokens[tokenizer->
+		tokenizer->tokens_list[tokenizer->current_pos]->tokens[tokenizer->
 							       tokens_list
 							       [tokenizer->
 								current_pos]->
 							       currentToken] =
 	    &tokenizer->nullTermInput[start_token];
-	tokenizer->tokens_list[tokenizer->current_pos]->currentToken++;
-	tokenizer->current_pos++;
+		tokenizer->tokens_list[tokenizer->current_pos]->currentToken++;
+		tokenizer->current_pos++;
+	} else {
+		tokenizer->current_pos++;
 	}
 	
 	printf("Reached end of tokenize\n");
