@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "shell.h"
 #include <unistd.h>
 
@@ -354,13 +355,8 @@ runlast(int pfd[])	/* last thing in the pipeline (cmd3) */
 void resetTokenizer()
 {
 	int b = 0;
-	int c = 0;
 	for (; b < 50; b++) {
 		tokenizer->tokens_list[b]->currentToken = 0;
-		for (; c < 1024; c++) {
-			tokenizer->tokens_list[b]->tokens[c] = '\0';
-		}
-		c = 0;
 	}
 
 	tokenizer->length_input = 0;
