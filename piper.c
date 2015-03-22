@@ -126,7 +126,8 @@ int piper(char **cmds[], int numCommands){
         while((pid = wait(&status)) != -1){ 
             fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
         }
-        exit(0);
+        
+	return 1;
     }
 
     /* 

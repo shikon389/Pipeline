@@ -115,6 +115,8 @@ void executeCommands()
 			cmds[r][s] = tokenizer->tokens_list[r]->tokens[s];
 		}
 	}
+
+	free(cmds);
 	
 	piper(cmds, numCommands);
 }
@@ -292,7 +294,7 @@ int main(int argc, char **argv)
 	initTokenizer();
 
 	while (promptUser()) {
-		sleep(3);
+		sleep(2);
 	}
 
 	printf("bye\n");
