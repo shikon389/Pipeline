@@ -15,15 +15,15 @@ tknzr *tokenizer;
 int promptUser()
 {
 	resetTokenizer();
+	
 	printf("$ ");
 	char prompt_input[400];
 	fgets(prompt_input, 400, stdin);
-	// printf("%d\n", tokenizer->current_pos);
 	tokenizer->input = trimwhitespace(prompt_input);
+	
 	strcpy(tokenizer->nullTermInput, trimwhitespace(prompt_input));
 	nullify(tokenizer->nullTermInput);
 	tokenizer->length_input = strlen(prompt_input);
-	// printf("%s\n", tokenizer->input);
 
 	if (!strcmp(tokenizer->input, "quit")) {
 		return 0;
@@ -38,11 +38,13 @@ void nullify(char *string)
 {
 	int i = 0;
 	int orig_length = strlen(string);
+
 	for(; i < orig_length; i++){
 		if(string[i] == ' '){
 			string[i] = '\0';
 		}
 	}
+
 }
 
 char *trimwhitespace(char *str)
@@ -80,7 +82,19 @@ void printTokens()
 		for (; y < tokenizer->tokens_list[x]->currentToken; y++) {
 			printf("%s\n", tokenizer->tokens_list[x]->tokens[y]);
 		}
+		y = 0;
 	}
+}
+
+void removeNullTerminators(int start, int end){
+
+	int m = start;
+	for(; m < end; m++){
+		if(tokenizer->input[m] == ' '){
+			tokenizer->nullTermInput[m] = ' ';
+		}
+	}
+	
 }
 
 /**
@@ -95,7 +109,7 @@ void printTokens()
  * character has been swapped with a '\0' character.
  *
  **/
-char **tokenize()
+void tokenize()
 {
 	int start_double_quote = -1;
 	int start_single_quote = -1;
@@ -106,6 +120,7 @@ char **tokenize()
 		if (tokenizer->input[i] == '\"') {
 			if (start_double_quote >= 0) {
 				
+				removeNullTerminators(start_double_quote, i);
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
@@ -116,12 +131,14 @@ char **tokenize()
 						       current_pos]->currentToken++;
 				start_single_quote = -1;
 				start_double_quote = -1;
+				
 			} else {
 				start_double_quote = i;
 			}
 		} else if (tokenizer->input[i] == '\'') {
 			if (start_single_quote >= 0) {
 
+				removeNullTerminators(start_single_quote, i);
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
@@ -172,9 +189,21 @@ char **tokenize()
 			}
 
 			i--;
+		} else if (tokenizer->input[i] == ' ') { 
+			// Not a token
+			while (i++ < tokenizer->length_input) {
+				if (tokenizer->input[i] != ' ') {
+					start_token = i;
+					break;
+				}
+				// Looping until we hit a non-whitespace character
+			}
+
+			i--;
 		}
 	}
 
+	if (tokenizer->input[i-1] != '\'' && tokenizer->input[i - 1] != '\"'){
 	tokenizer->tokens_list[tokenizer->current_pos]->tokens[tokenizer->
 							       tokens_list
 							       [tokenizer->
@@ -183,10 +212,9 @@ char **tokenize()
 	    &tokenizer->nullTermInput[start_token];
 	tokenizer->tokens_list[tokenizer->current_pos]->currentToken++;
 	tokenizer->current_pos++;
-
+	}
+	
 	printf("Reached end of tokenize\n");
-	//printf("%s\n", tokenizer->input);
-	return NULL;
 }
 
 /**
@@ -333,7 +361,7 @@ void resetTokenizer()
 
 int main(int argc, char **argv)
 {
-	int pid, status;
+/*	int pid, status;
 	int fd1[2];
 	int fd2[2];
 
@@ -346,7 +374,7 @@ int main(int argc, char **argv)
 	runmiddle(fd1, fd2);
 
 	close(fd1[0]); 
-	close(fd1[1]); /*this is important! close both file descriptors on the pipe */
+	close(fd1[1]); //this is important! close both file descriptors on the pipe 
 
 	runlast(fd2);
 
@@ -354,15 +382,10 @@ int main(int argc, char **argv)
 	close(fd2[0]);
 	close(fd2[1]);
 
-	while ((pid = wait(&status)) != -1)	/* dead kids */
+	while ((pid = wait(&status)) != -1)	// dead kids 
 		fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
 	exit(0);
-
-
-
-
-
-
+*/
 
 	initTokenizer();
 

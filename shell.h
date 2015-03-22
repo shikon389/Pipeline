@@ -20,6 +20,7 @@ int promptUser();
 void nullify(char *string);
 char* trimwhitespace(char *str);
 void printTokens();
-char** tokenize();
+void removeNullTerminators(int start, int end);
+void tokenize();
 void initTokenizer();
 void resetTokenizer();
