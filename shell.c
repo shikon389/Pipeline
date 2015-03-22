@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 tknzr *tokenizer;
+int pipes[50][2];
 
 /**
  *
@@ -31,6 +32,8 @@ int promptUser()
 	} else {
 		tokenize();
 		printTokens();
+		nullTerminateCommands();
+		executeCommands();
 		return 1;
 	}
 }
@@ -72,7 +75,7 @@ char *trimwhitespace(char *str)
 
 void printTokens()
 {
-	int x = 0;
+	/*int x = 0;
 	int y = 0;
 	printf("# of commands: %d\n", tokenizer->current_pos);
 	printf("# of tokens that make up first command: %d\n",
@@ -84,7 +87,36 @@ void printTokens()
 			printf("%s\n", tokenizer->tokens_list[x]->tokens[y]);
 		}
 		y = 0;
+	}*/
+}
+
+void nullTerminateCommands()
+{
+	int c = 0;
+
+	for (; c < tokenizer->current_pos; c++){
+		tokenizer->tokens_list[c]->tokens[tokenizer->tokens_list[c]->currentToken] = 0;
+		tokenizer->tokens_list[c]->currentToken++;
 	}
+}
+
+void executeCommands()
+{
+	int numCommands = tokenizer->current_pos;
+	
+	char ***cmds = (char ***) calloc(numCommands, sizeof(char **));
+   	 
+	int r = 0;
+	for(; r < numCommands; r++){
+		int numArgs = tokenizer->tokens_list[r]->currentToken;
+		cmds[r] = (char **) calloc(numArgs, sizeof(char **));
+		int s = 0;
+		for(; s < numArgs; s++){
+			cmds[r][s] = tokenizer->tokens_list[r]->tokens[s];
+		}
+	}
+	
+	piper(cmds, numCommands);
 }
 
 void removeNullTerminators(int start, int end){
@@ -167,7 +199,8 @@ void tokenize()
 			   && tokenizer->input[i - 1] != '\'') {
 			// What if user types in: ls    |      wc -l, hence tokenizer->input[i-1] != ' '
 
-			printf("entered whitespace statement. (command %d)\n", tokenizer->current_pos);
+			// printf("entered whitespace statement. (command %d)\n", tokenizer->current_pos);
+
 			tokenizer->tokens_list[tokenizer->current_pos]->tokens
 			    [tokenizer->tokens_list
 			     [tokenizer->current_pos]->currentToken] = &tokenizer->nullTermInput[start_token];
@@ -223,7 +256,6 @@ void tokenize()
 		tokenizer->current_pos++;
 	}
 	
-	printf("Reached end of tokenize\n");
 }
 
 /**
@@ -244,114 +276,6 @@ void initTokenizer()
 	}
 }
 
-/* Megan attempts to execute the tokenized commands
-*
-* Three cases:  First item
-*				Middle Item(s)
-*				Last Item
-*
-* Whatever is written to fd[1] will be read from fd[0].
-* 			[(0) INPUT]  [(1) OUTPUT]
-*/
-//char *cmds[][] = { {"ls", 0}, {"find", "main.c", 0}, { "find", "shell.c", 0}};
-char *cmd1[] = { "ls", 0 };
-char *cmd2[] = { "grep", "s", 0 };
-char *cmd3[] = { "grep", ".c", 0 };
-
-//right now this runs first, middle, and last.
-//this needs to be set up in a way that:
-//	if args = 1, only run last
-//  if args = 2, only run first and last
-//  if args >= 3, run first, then run middle until there is only one arg left, then run last on it
-
-void runfirst(int pfd1[]);
-void runmiddle(int pfd1[], int pfd2[]);
-void runlast(int pfd[]);
-
-void
-runfirst(int pfd1[])	/* run the first part of the pipeline, cmd1 */
-{
-	int pid;	/* we don't use the process ID here, but you may wnat to print it for debugging */
-
-	switch (pid = fork()) {
-
-	case 0: /* child */
-		//dup2(pfd[0], 0);  /*Put the first command here just to print it to the screen */
-		//execvp(cmd1[0], cmd1);  /*Run it so we know what to print*/
-
-		dup2(pfd1[1], 1);	/* now we actually put it where we need it to be */
-		close(pfd1[0]); 		/* this process don't need the other end */
-		close(pfd1[1]);
-		execvp(cmd1[0], cmd1);	/* run the command */
-		perror(cmd1[0]);	/* if it failed */
-		break;
-
-	default: /* parent does nothing */
-		//printf("%d\n", pid );
-		break;
-
-	case -1:
-		perror("fork");
-		exit(1);
-	}
-}
-
-void
-runmiddle(int pfd1[], int pfd2[])	/* run the first part of the pipeline, cmd2 */
-{
-	int pid;	/* we don't use the process ID here, but you may wnat to print it for debugging */
-
-	switch (pid = fork()) {
-
-	case 0: /* child */
-		//dup2(pfd[0], 0);  /*Put the first command here just to print it to the screen */
-		//execvp(cmd2[0], cmd2);  /*Run it so we know what to print*/
-
-		dup2(pfd1[0], 0);	/* now we actually put it where we need it to be */
-		dup2(pfd2[1], 1);
-		close(pfd1[0]);
-		close(pfd1[1]);
-		close(pfd2[0]);
-		close(pfd2[1]);
-		execvp(cmd2[0], cmd2);	/* run the command */
-		perror(cmd2[0]);	/* if it failed */
-		break; 
-
-	default: /* parent does nothing */
-		//printf("%d\n", pid );
-		break;
-
-	case -1:
-		perror("fork");
-		exit(1);
-	}
-}
-
-void
-runlast(int pfd[])	/* last thing in the pipeline (cmd3) */
-{
-	int pid;
-
-	switch (pid = fork()) {
-
-	case 0: /* child */
-		dup2(pfd[0], 0);	/* this end of the pipe becomes the standard input */
-		close(pfd[0]);
-		close(pfd[1]);		/* this process doesn't need the other end */
-		execvp(cmd3[0], cmd3);	/* run the command */
-		perror(cmd3[0]);	/* if it failed! */
-		break;
-
-	default: /* parent does nothing */
-		//printf("%d\n", pid );
-		break;
-
-	case -1:
-		perror("fork");
-		exit(1);
-	}
-}
-
 void resetTokenizer()
 {
 	int b = 0;
@@ -365,35 +289,10 @@ void resetTokenizer()
 
 int main(int argc, char **argv)
 {
-	int pid, status;
-	int fd1[2];
-	int fd2[2];
-
-
-	pipe(fd1);
-	pipe(fd2);
-
-	runfirst(fd1);
-
-	runmiddle(fd1, fd2);
-
-	close(fd1[0]); 
-	close(fd1[1]); //this is important! close both file descriptors on the pipe 
-
-	runlast(fd2);
-
-
-	close(fd2[0]);
-	close(fd2[1]);
-
-	while ((pid = wait(&status)) != -1)	// dead kids 
-		fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
-	exit(0);
-
-
 	initTokenizer();
 
 	while (promptUser()) {
+		sleep(3);
 	}
 
 	printf("bye\n");
