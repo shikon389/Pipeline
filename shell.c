@@ -14,27 +14,89 @@ tknzr *tokenizer;
  **/
 int promptUser()
 {
+	resetTokenizer();
 	printf("$ ");
 	char prompt_input[400];
-	scanf("%s", prompt_input);
-	tokenizer->input = prompt_input;
+	fgets(prompt_input, 400, stdin);
+	// printf("%d\n", tokenizer->current_pos);
+	tokenizer->input = trimwhitespace(prompt_input);
+	strcpy(tokenizer->nullTermInput, trimwhitespace(prompt_input));
+	nullify(tokenizer->nullTermInput);
 	tokenizer->length_input = strlen(prompt_input);
-	printf("%s\n", prompt_input);
+	// printf("%s\n", tokenizer->input);
 
-	if (strcmp(prompt_input, "quit")) {
-		printf("if %s\n", prompt_input);
-		return 1;
-	} 
-	else {
-		printf("else %s\n", prompt_input);
-		tokenize();
+	if (!strcmp(tokenizer->input, "quit")) {
 		return 0;
+	} else {
+		tokenize();
+		printTokens();
+		return 1;
 	}
 }
 
+void nullify(char *string)
+{
+	int i = 0;
+	int orig_length = strlen(string);
+	for(; i < orig_length; i++){
+		if(string[i] == ' '){
+			string[i] = '\0';
+		}
+	}
+}
+
+char *trimwhitespace(char *str)
+{
+	char *end;
+
+	// Trim leading space
+	while (isspace(*str))
+		str++;
+
+	if (*str == 0) // All spaces?
+		return str;
+
+	// Trim trailing space
+	end = str + strlen(str) - 1;
+	while (end > str && isspace(*end))
+		end--;
+
+	// Write new null terminator
+	*(end + 1) = 0;
+
+	return str;
+}
+
+void printTokens()
+{
+	int x = 0;
+	int y = 0;
+	printf("# of commands: %d\n", tokenizer->current_pos);
+	printf("# of tokens that make up first command: %d\n",
+	       tokenizer->tokens_list[0]->currentToken);
+
+	for (; x < tokenizer->current_pos; x++) {
+		printf("\nCommand %d: %d tokens\n--------\n", x, tokenizer->tokens_list[x]->currentToken);
+		for (; y < tokenizer->tokens_list[x]->currentToken; y++) {
+			printf("%s\n", tokenizer->tokens_list[x]->tokens[y]);
+		}
+	}
+}
+
+/**
+ * This does the main tokenizing. It will iterate through the string
+ * character by character. On each character, it will check to see
+ * if it is a double quote, single quote, white space, or pipeline character.
+ *
+ * It will store pointers of the tokens within tokens array contained in the
+ * Tokens_list struct. The main for loop is looping through the normal input
+ * while the pointers to the tokens are within the nullTermInput string. The
+ * nullTermInput string is the same as tokenizer->input except each whitespace
+ * character has been swapped with a '\0' character.
+ *
+ **/
 char **tokenize()
 {
-
 	int start_double_quote = -1;
 	int start_single_quote = -1;
 	int i = 0;
@@ -43,17 +105,12 @@ char **tokenize()
 	for (; i < tokenizer->length_input; i++) {
 		if (tokenizer->input[i] == '\"') {
 			if (start_double_quote >= 0) {
-
-				int token_length = i - start_double_quote + 1;
-				char strbuff[token_length];
-				strncpy(strbuff,
-					tokenizer->input + start_double_quote,
-					token_length);
+				
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
 				     [tokenizer->current_pos]->currentToken] =
-				    strbuff;
+				    &tokenizer->nullTermInput[start_double_quote];
 
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->currentToken++;
@@ -65,16 +122,11 @@ char **tokenize()
 		} else if (tokenizer->input[i] == '\'') {
 			if (start_single_quote >= 0) {
 
-				int token_length = i - start_single_quote + 1;
-				char strbuff[token_length];
-				strncpy(strbuff,
-					tokenizer->input + start_single_quote,
-					token_length);
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
 				     [tokenizer->current_pos]->currentToken] =
-				    strbuff;
+				    &tokenizer->nullTermInput[start_single_quote];
 
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->currentToken++;
@@ -91,14 +143,10 @@ char **tokenize()
 			   && tokenizer->input[i - 1] != '\'') {
 			// What if user types in: ls    |      wc -l, hence tokenizer->input[i-1] != ' '
 
-			int token_length = i - start_token;
-			char strbuff[token_length];
-			strncpy(strbuff, tokenizer->input + start_token,
-				token_length);
-			tokenizer->tokens_list[tokenizer->
-					       current_pos]->tokens
+			printf("entered whitespace statement. (command %d)\n", tokenizer->current_pos);
+			tokenizer->tokens_list[tokenizer->current_pos]->tokens
 			    [tokenizer->tokens_list
-			     [tokenizer->current_pos]->currentToken] = strbuff;
+			     [tokenizer->current_pos]->currentToken] = &tokenizer->nullTermInput[start_token];
 
 			tokenizer->tokens_list[tokenizer->
 					       current_pos]->currentToken++;
@@ -123,17 +171,33 @@ char **tokenize()
 				// Looping until we hit a non-whitespace character
 			}
 
+			i--;
 		}
-
 	}
 
+	tokenizer->tokens_list[tokenizer->current_pos]->tokens[tokenizer->
+							       tokens_list
+							       [tokenizer->
+								current_pos]->
+							       currentToken] =
+	    &tokenizer->nullTermInput[start_token];
+	tokenizer->tokens_list[tokenizer->current_pos]->currentToken++;
+	tokenizer->current_pos++;
+
+	printf("Reached end of tokenize\n");
+	//printf("%s\n", tokenizer->input);
 	return NULL;
 }
 
+/**
+ * Initializes the tokenizer variable and sets its fields
+ * to their proper initial values.
+ **/
 void initTokenizer()
 {
 	tokenizer = (tknzr *) malloc(sizeof(tknzr));
 	tokenizer->current_pos = 0;
+	tokenizer->nullTermInput = malloc(sizeof(char) * 400);
 
 	int z = 0;
 	for (; z < 50; z++) {
@@ -142,11 +206,6 @@ void initTokenizer()
 		tokenizer->tokens_list[z]->currentToken = 0;
 	}
 }
-
-
-
-
-
 
 /* Megan attempts to execute the tokenized commands
 *
@@ -256,18 +315,21 @@ runlast(int pfd[])	/* last thing in the pipeline (cmd3) */
 	}
 }
 
+void resetTokenizer()
+{
+	int b = 0;
+	int c = 0;
+	for (; b < 50; b++) {
+		tokenizer->tokens_list[b]->currentToken = 0;
+		for (; c < 1024; c++) {
+			tokenizer->tokens_list[b]->tokens[c] = '\0';
+		}
+		c = 0;
+	}
 
-
-
-
-
-
-
-
-
-
-
-
+	tokenizer->length_input = 0;
+	tokenizer->current_pos = 0;
+}
 
 int main(int argc, char **argv)
 {
