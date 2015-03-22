@@ -365,7 +365,7 @@ void resetTokenizer()
 
 int main(int argc, char **argv)
 {
-/*	int pid, status;
+	int pid, status;
 	int fd1[2];
 	int fd2[2];
 
@@ -389,7 +389,7 @@ int main(int argc, char **argv)
 	while ((pid = wait(&status)) != -1)	// dead kids 
 		fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
 	exit(0);
-*/
+
 
 	initTokenizer();
 
