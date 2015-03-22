@@ -4,4 +4,26 @@ Megan Murray
 
 Assignment 5 - Pipelining
 
+	After our program takes in the users input, it parsers it into an
+array of structs. Said struct, stores each command and it's corsponding
+arguments/flags into a seperate array. After our database is complete, we 
+set up a number of pipelines based on the ammount of commands the user wishes to
+execute. Depending on what number command is being executed, we have a
+seperate method for the first command, in between commands and the final
+command. Every time a new command needs to be executed, we fork a new process,
+create a new pipline with dup2 and then use execvp to execute the new request.
 
+	We tested our program under the following conditions:
+
+1. A single command with no arguments.
+2. A single command with one arguments.
+3. A single command with multiple arguments.
+4. Two commands with no arguments.
+5. Two commands with a signle argument.
+6. Two commands with multiple arguments.
+7. Three or more commands with no arguments.
+8. Three or more commands with a signle argument.
+9. Three or more commands with multiple arguments.
+
+All tests with multiple arguments had a combination of arguments with single
+quotes, double quotes and no quotes, to test if our parser worked properly.
