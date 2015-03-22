@@ -121,11 +121,14 @@ void tokenize()
 			if (start_double_quote >= 0) {
 				
 				removeNullTerminators(start_double_quote, i);
+				tokenizer->nullTermInput[start_double_quote] = '\0';
+				tokenizer->nullTermInput[i] = '\0';
+
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
 				     [tokenizer->current_pos]->currentToken] =
-				    &tokenizer->nullTermInput[start_double_quote];
+				    &tokenizer->nullTermInput[start_double_quote + 1];
 
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->currentToken++;
@@ -139,11 +142,14 @@ void tokenize()
 			if (start_single_quote >= 0) {
 
 				removeNullTerminators(start_single_quote, i);
+				tokenizer->nullTermInput[start_single_quote] = '\0';
+				tokenizer->nullTermInput[i] = '\0';
+				
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->tokens
 				    [tokenizer->tokens_list
 				     [tokenizer->current_pos]->currentToken] =
-				    &tokenizer->nullTermInput[start_single_quote];
+				    &tokenizer->nullTermInput[start_single_quote + 1];
 
 				tokenizer->tokens_list[tokenizer->
 						       current_pos]->currentToken++;
