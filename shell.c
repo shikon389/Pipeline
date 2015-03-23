@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 tknzr *tokenizer;
-int pipes[50][2];
 
 /**
  *
@@ -38,6 +37,11 @@ int promptUser()
 	}
 }
 
+/**
+ *
+ * This will replace all whitespace characters with '\0'.
+ * 
+ **/
 void nullify(char *string)
 {
 	int i = 0;
@@ -51,6 +55,11 @@ void nullify(char *string)
 
 }
 
+/**
+ *
+ * This will trim leading and trailing whitespaces.
+ * 
+ **/
 char *trimwhitespace(char *str)
 {
 	char *end;
@@ -73,6 +82,12 @@ char *trimwhitespace(char *str)
 	return str;
 }
 
+/**
+ *
+ * This method will print out all the tokens for each
+ * command.
+ * 
+ **/
 void printTokens()
 {
 	/*int x = 0;
@@ -90,6 +105,11 @@ void printTokens()
 	}*/
 }
 
+/**
+ *
+ * This method will place a 0 at the end of each command's tokens list.
+ * 
+ **/
 void nullTerminateCommands()
 {
 	int c = 0;
@@ -100,6 +120,12 @@ void nullTerminateCommands()
 	}
 }
 
+/**
+ *
+ * This method will call the piper function that is available within the piper.c file
+ * in order to help execute the command(s).
+ *
+ **/
 void executeCommands()
 {
 	int numCommands = tokenizer->current_pos;
@@ -116,11 +142,26 @@ void executeCommands()
 		}
 	}
 
+	/* execution of commands */
+	piper(cmds, numCommands);
+
+	/* free'ing memory */
+	r = 0;
+	for(; r < numCommands; r++){
+		free(cmds[r]);
+	}
+	
 	free(cmds);
 	
-	piper(cmds, numCommands);
 }
 
+/**
+ *
+ * This method will remove null terminators that had been put in place
+ * for whitespaces. It is used for whitespaces between a set of double
+ * quotes or between a set of single quotes.
+ * 
+ **/
 void removeNullTerminators(int start, int end){
 
 	int m = start;
@@ -261,8 +302,10 @@ void tokenize()
 }
 
 /**
+ *
  * Initializes the tokenizer variable and sets its fields
  * to their proper initial values.
+ *
  **/
 void initTokenizer()
 {
@@ -278,6 +321,11 @@ void initTokenizer()
 	}
 }
 
+/**
+ *
+ * Resets the tokenizer by reinitializing some of its fields to zero.
+ *
+ **/
 void resetTokenizer()
 {
 	int b = 0;
@@ -294,7 +342,7 @@ int main(int argc, char **argv)
 	initTokenizer();
 
 	while (promptUser()) {
-		sleep(2);
+		sleep(1);
 	}
 
 	printf("bye\n");

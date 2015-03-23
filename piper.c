@@ -147,12 +147,6 @@ int piper(char **cmds[], int numCommands){
         }
 
 
-        /*
-        pipe(pipes[0]);
-        pipe(pipes[1]);
-        */
-
-
         /* keeps track of the current pipe */
         int p_counter = 0; 
 
@@ -180,33 +174,3 @@ int piper(char **cmds[], int numCommands){
 
     return 1;
 }
-/*
-int main(int argc, char **argv){
-    char ***cmds = (char ***)calloc(4, sizeof(char **));
-    cmds[0] = (char **)calloc(3, sizeof(char *));
-    cmds[1] = (char **)calloc(3, sizeof(char *));
-    cmds[2] = (char **)calloc(3, sizeof(char *));
-    cmds[3] = (char **)calloc(3, sizeof(char *));
-
-    // set the first command 
-    cmds[0][0] = "cat";
-    cmds[0][1] = "t";
-    cmds[0][2] = 0;
-
-    // set the second command 
-    cmds[1][0] = "grep";
-    cmds[1][1] = "at";
-    cmds[1][2] = 0;
-
-    // set the third command 
-    cmds[2][0] = "grep";
-    cmds[2][1] = "cat";
-    cmds[2][2] = 0;
-
-    // set the fourth command 
-    cmds[3][0] = "grep";
-    cmds[3][1] = "cata";
-    cmds[3][2] = 0;
-
-    piper(cmds, 4);
-}*/
