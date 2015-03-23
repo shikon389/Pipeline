@@ -15,15 +15,106 @@ create a new pipline with dup2 and then use execvp to execute the new request.
 
 	We tested our program under the following conditions:
 
-1. A single command with no arguments.
-2. A single command with one arguments.
-3. A single command with multiple arguments.
-4. Two commands with no arguments.
-5. Two commands with a signle argument.
-6. Two commands with multiple arguments.
-7. Three or more commands with no arguments.
-8. Three or more commands with a signle argument.
-9. Three or more commands with multiple arguments.
+1. Empty command #1 - WORKS
+Test: enter just a newline. All that should happen is that you should get another prompt.
 
-All tests with multiple arguments had a combination of arguments with single
-quotes, double quotes and no quotes, to test if our parser worked properly.
+2. Empty command #2 - WORKS
+Test: enter a bunch of spaces and tabs followed by a newline. All that should happen is that you should get another prompt.
+
+3. Exit on end of file - WORKS
+Enter a control C at the command prompt. The shell should exit cleanly (just like with the exit command).
+
+4. A shell prompt for each line of input - WORKS
+The shell should issue a prompt. The prompt should NOT terminate with a newline. That is, commands will be entered on the same line as the prompt.
+
+5. No shell prompt if the standard input is not a terminal - WORKS
+Your shell should not print a prompt if the input is not a terminal.
+
+6. The shell should run a simple command with arguments - WORKS
+See cases below for more detail on this testing
+
+7. The shell should print an exit code for each process that terminates - WORKS
+
+8. Handle too many arguments gracefully - WORKS
+Does not crash or issue a warning - only takes in the first 400 characters and ignores the rest
+
+9. Quotes should be handled properly - WORKS
+See cases below for more detail on this testing
+
+10. Spaces within quotes should be parsed correctly - WORKS
+
+11. Mismatched quotes should be detected and handled gracefully #1. - NOT WORKING
+echo 'abc
+produces
+'abc
+12. Mismatched quotes should be detected and handled gracefully #2. - NOT WORKING
+echo "abc'
+produces a blank new prompt
+
+13., 14, 15 - WORK, see below for more detail
+
+16. Pipes that pass a lot of data should work.  WORKS somewhat
+Could not properly read cat moby.txt |tr A-Z a-z|tr -C a-z '\n' |sed  '/^$/d' |sort|uniq -c|sort -nr|sed 10q
+
+The following works
+cat moby.txt | tr [:space:] '\n' | sort | uniq -c
+
+17. The cd command should work with one argument
+Run cd /etc and then run pwd. It should output /etc.
+
+18. The cd command should work with no arguments - NOT WORKING
+Run cd and then run pwd. It should print your home directory.
+This doesn't work.  cd is read as a command, but its arguments are not read properly
+
+19. The cd command should barf when given more than one argument - NOT WORKING
+Doesn't work because arguments of cd are not read correctly
+
+20, 21 The exit command should exit with / without arguments - NOT WORKING
+
+22. Check that the shell is able to accept at least 10 commands. - NOT WORKING
+(typeset -i i;i=0;while [ $i -lt 10 ];do echo echo $i;i=i+1;done;)|./shell
+
+23. Check that the shell is able to accept at least 1000 commands. - NOT WORKING
+(typeset -i i;i=0;while [ $i -lt 1000 ];do echo echo $i;i=i+1;done;)|./shell
+
+
+
+
+Other Pipe tests
+
+1. A single command with no arguments.
+		Tested ls, Works
+
+2. A single command with one arguments.
+		Tested cat piper.c, Works
+
+3. A single command with multiple arguments.
+		Tested ls -l -t, Works
+
+4. Two commands with no arguments.
+		Tested ls | ls, Works
+
+5. Two commands with a single argument.
+		Tested ls | find piper.c, Works
+		Tested ls -l | find shell.c, Works
+
+6. Two commands with multiple arguments.
+		Tested ls -l -t | ls -t -l, Works
+
+7. Three or more commands with no arguments.
+		Tested ls | ls | ls, Works
+
+8. Three or more commands with a single argument.
+		Tested cat piper.c | find shell.c | ls -l, Works
+
+9. Three or more commands with multiple arguments.
+		Tested ls -l -t | ls -l -t | ls -l -t | ls -t -l, Works
+
+(All tests with multiple arguments also tested with combinations of quotes, double quotes, and no quotes, to test if our parser worked properly.)
+
+10. QUIT
+typing in "quit" ends the process just like Ctrl + C
+
+If you try to quit after you've hit enter (made newlines) you have to type quit twice to get the quit to work, and then if you hit any keys after that it starts forking like crazy and basically brings down that ilab machine.
+
+IF quit is entered right away (or directly after a command was excecuted) it works fine.
