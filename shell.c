@@ -26,7 +26,7 @@ int promptUser()
 	nullify(tokenizer->nullTermInput);
 	tokenizer->length_input = strlen(prompt_input);
 
-	if (!strcmp(tokenizer->input, "quit")) {
+	if (strcmp(tokenizer->input, "quit")==0) {
 		return 0;
 	} else {
 		tokenize();
