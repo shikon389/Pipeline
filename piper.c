@@ -8,8 +8,7 @@
 //char **cmd[] = {{ "ls", 0}, {"grep", ".c", 0}, {"grep", "s", 0}};
 int pipes[50][2];
 
-
-int runOne(char **cmd){
+void runOne(char **cmd){
     switch(fork()){
         /* child */
         case 0:
@@ -27,7 +26,7 @@ int runOne(char **cmd){
     }
 }
 
-int runFirst(char **cmd, int fd[]){
+void runFirst(char **cmd, int fd[]){
     switch(fork()){
         /* child */
         case 0: 
@@ -49,7 +48,7 @@ int runFirst(char **cmd, int fd[]){
     }
 }
 
-int runMiddle(char **cmd, int fd1[], int fd2[]){
+void runMiddle(char **cmd, int fd1[], int fd2[]){
     switch(fork()){
         /* child */
         case 0: 
@@ -75,7 +74,7 @@ int runMiddle(char **cmd, int fd1[], int fd2[]){
      
 }
 
-int runLast(char **cmd, int fd[]){
+void runLast(char **cmd, int fd[]){
     switch(fork()){
         /* child */
         case 0: 
@@ -123,11 +122,12 @@ int piper(char **cmds[], int numCommands){
         close(pipes[0][0]);
         close(pipes[0][1]);
 
-        /* pick up dead kids */
+        /* pick up zombie processes */
         while((pid = wait(&status)) != -1){ 
             fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
         }
-        exit(0);
+        
+	return 1;
     }
 
     /* 
@@ -143,15 +143,8 @@ int piper(char **cmds[], int numCommands){
          */
         int counter = 0; 
         for(; counter<numCommands-1; counter++){
-            //printf("pipe #: %d\n", counter);
             pipe(pipes[counter]);
         }
-
-
-        /*
-        pipe(pipes[0]);
-        pipe(pipes[1]);
-        */
 
 
         /* keeps track of the current pipe */
@@ -160,64 +153,24 @@ int piper(char **cmds[], int numCommands){
         /* execute the first command */
         runFirst(cmds[0], pipes[0]);
 
-        /*
-        runMiddle(cmds[1], pipes[0], pipes[1]);
-        close(pipes[0][0]);
-        close(pipes[0][1]);
-        runLast(cmds[2], pipes[1]);
-        close(pipes[1][0]);
-        close(pipes[1][1]);
-        */
-
         /* execute the middle commands */
         for(counter = 1; counter < numCommands-1; counter++){
-            //printf("middle: %s -- p_counter: %d\n", cmds[counter][0], p_counter);
             runMiddle(cmds[counter], pipes[p_counter], pipes[p_counter+1]);
             p_counter = p_counter + 1; 
-            //printf("p_counter: %d\n", p_counter-1);
             close(pipes[p_counter-1][0]);
             close(pipes[p_counter-1][1]);
         }
 
         /* have to run the last command */
-        //printf("pipeCounter: %d\n", p_counter);
         runLast(cmds[counter], pipes[p_counter]);
         close(pipes[p_counter][0]);
         close(pipes[p_counter][1]);
 
-        /* pick up dead kids */
+        /* pick up zombie processes */
         while((pid = wait(&status)) != -1){ 
             fprintf(stderr, "process %d exits with %d\n", pid, WEXITSTATUS(status));
         }
-    }   
-}
+    }
 
-int main(int argc, char **argv){
-    char ***cmds = (char ***)calloc(4, sizeof(char **));
-    cmds[0] = (char **)calloc(3, sizeof(char *));
-    cmds[1] = (char **)calloc(3, sizeof(char *));
-    cmds[2] = (char **)calloc(3, sizeof(char *));
-    cmds[3] = (char **)calloc(3, sizeof(char *));
-
-    /* set the first command */
-    cmds[0][0] = "cat";
-    cmds[0][1] = "t";
-    cmds[0][2] = 0;
-
-    /* set the second command */
-    cmds[1][0] = "grep";
-    cmds[1][1] = "at";
-    cmds[1][2] = 0;
-
-    /* set the third command */
-    cmds[2][0] = "grep";
-    cmds[2][1] = "cat";
-    cmds[2][2] = 0;
-
-    /* set the fourth command */
-    cmds[3][0] = "grep";
-    cmds[3][1] = "cata";
-    cmds[3][2] = 0;
-
-    piper(cmds, 4);
+    return 1;
 }
