@@ -4,9 +4,9 @@ Megan Murray
 
 Assignment 5 - Pipelining
 
-	After our program takes in the users input, it parsers it into an
-array of structs. Said struct, stores each command and it's corsponding
-arguments/flags into a seperate array. After our database is complete, we 
+	After our program takes in the users input, it parses it into an
+array of structs. Said struct, stores each command and it's corresponding
+arguments/flags into a seperate array. After our store the commands and arguments, we 
 set up a number of pipelines based on the ammount of commands the user wishes to
 execute. Depending on what number command is being executed, we have a
 seperate method for the first command, in between commands and the final
