@@ -9,6 +9,7 @@
 
 int pipes[50][2];
 
+
 void runOne(char **cmd){
     switch(fork()){
         /* child */
