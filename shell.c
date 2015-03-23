@@ -29,10 +29,11 @@ int promptUser()
 	if (strcmp(tokenizer->input, "quit")==0) {
 		return 0;
 	} else {
-		tokenize();
-		printTokens();
-		nullTerminateCommands();
-		executeCommands();
+		if (tokenize()) {
+			printTokens();
+			nullTerminateCommands();
+			executeCommands();
+		}
 		return 1;
 	}
 }
@@ -185,7 +186,7 @@ void removeNullTerminators(int start, int end){
  * character has been swapped with a '\0' character.
  *
  **/
-void tokenize()
+int tokenize()
 {
 	int start_double_quote = -1;
 	int start_single_quote = -1;
@@ -299,6 +300,12 @@ void tokenize()
 		tokenizer->current_pos++;
 	}
 	
+	if (start_double_quote != -1 || start_single_quote != -1){
+		printf("error: mismatched quote\n");
+		return 0;
+	}
+
+	return 1;
 }
 
 /**

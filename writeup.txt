@@ -43,13 +43,9 @@ See cases below for more detail on this testing
 
 10. Spaces within quotes should be parsed correctly - WORKS
 
-11. Mismatched quotes should be detected and handled gracefully #1. - NOT WORKING
-echo 'abc
-produces
-'abc
-12. Mismatched quotes should be detected and handled gracefully #2. - NOT WORKING
-echo "abc'
-produces a blank new prompt
+11. Mismatched quotes should be detected and handled gracefully #1. - WORKS
+
+12. Mismatched quotes should be detected and handled gracefully #2. - WORKS
 
 13., 14, 15 - WORK, see below for more detail
 

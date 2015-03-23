@@ -24,7 +24,7 @@ void printTokens();
 void nullTerminateCommands();
 void executeCommands();
 void removeNullTerminators(int start, int end);
-void tokenize();
+int tokenize();
 void initTokenizer();
 void resetTokenizer();
 
