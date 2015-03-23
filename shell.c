@@ -1,4 +1,10 @@
-#include <stdio.h>
+/**
+* Neil Patel
+* Carmine Iannaccone - carminei, 137004702
+* Megan Murray - msm230, 138003154
+*/
+
+include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -20,6 +26,11 @@ int promptUser()
 	printf("$ ");
 	char prompt_input[400];
 	fgets(prompt_input, 400, stdin);
+
+	if(strlen(prompt_input)==0){
+		return 1;
+	}
+
 	tokenizer->input = trimwhitespace(prompt_input);
 	
 	strcpy(tokenizer->nullTermInput, trimwhitespace(prompt_input));
@@ -29,11 +40,10 @@ int promptUser()
 	if (strcmp(tokenizer->input, "quit")==0) {
 		return 0;
 	} else {
-		if (tokenize()) {
-			printTokens();
-			nullTerminateCommands();
-			executeCommands();
-		}
+		tokenize();
+		printTokens();
+		nullTerminateCommands();
+		executeCommands();
 		return 1;
 	}
 }
@@ -186,7 +196,7 @@ void removeNullTerminators(int start, int end){
  * character has been swapped with a '\0' character.
  *
  **/
-int tokenize()
+void tokenize()
 {
 	int start_double_quote = -1;
 	int start_single_quote = -1;
@@ -300,12 +310,6 @@ int tokenize()
 		tokenizer->current_pos++;
 	}
 	
-	if (start_double_quote != -1 || start_single_quote != -1){
-		printf("error: mismatched quote\n");
-		return 0;
-	}
-
-	return 1;
 }
 
 /**
@@ -349,7 +353,7 @@ int main(int argc, char **argv)
 	initTokenizer();
 
 	while (promptUser()) {
-		sleep(1);
+		//sleep(1);
 	}
 
 	printf("bye\n");

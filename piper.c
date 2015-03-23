@@ -4,8 +4,9 @@
 #include <ctype.h>
 #include <unistd.h>
 #include "shell.h"
+#include <sys/types.h>
 
-//char **cmd[] = {{ "ls", 0}, {"grep", ".c", 0}, {"grep", "s", 0}};
+
 int pipes[50][2];
 
 void runOne(char **cmd){
@@ -101,6 +102,7 @@ int piper(char **cmds[], int numCommands){
     if(numCommands == 0){
         return 0;
     }
+
 
     /* one command */
     if(numCommands == 1){
